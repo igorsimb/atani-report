@@ -4,6 +4,8 @@ Atani Report is a Python desktop application that generates reports from Excel f
 as well as
 tkinter and customtkinter libraries to create a user-friendly interface. 
 
+![screenshot](https://user-images.githubusercontent.com/85621672/235655174-aff6d7b2-2360-43a0-8722-175da05a0745.png)
+
 Download the latest version [here](https://github.com/igorsimb/atani-report/releases).
 
 ### Features
