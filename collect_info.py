@@ -61,7 +61,7 @@ def conclustions(file):
 
     # create a list of values from conc_text generator
     for row in conc_text:
-        conc_text_list.extend(f"!{cell.value}" for cell in row if cell.value is not None)
+        conc_text_list.extend(f"❕{cell.value}" for cell in row if cell.value is not None)
 
     # turn list into string with separate lines
     return "\n".join(conc_text_list)
