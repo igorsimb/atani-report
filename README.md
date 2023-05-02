@@ -30,4 +30,4 @@ Download the latest executable version [here](https://github.com/igorsimb/atani-
 3. Click the "Copy to clipboard" button to copy the report to clipboard.
 
 ### Credits
-- igorsimb.ru
+- [igorsimb.ru](https://igorsimb.ru/)
