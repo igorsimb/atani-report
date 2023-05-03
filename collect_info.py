@@ -6,6 +6,9 @@ class File:
         self.report_wb = load_workbook(file_path, read_only=True, data_only=True)
         self.svod_shop = self.report_wb["svod_shop"]
 
+        # Дата
+        self.date_range = self.svod_shop["E1"].value
+
         # Заказано товаров, шт.
         self.ordered_items_text = self.svod_shop["A5"].value
         self.ordered_items_value = self.svod_shop["E5"].value
@@ -41,10 +44,8 @@ class File:
 
 
 def overview(file):
-    start_date = "10.04"
-    end_date = "16.04"
     marketplace = "ОЗОН"
-    overview = f"Высылаем отчет с {start_date}-{end_date}\n" \
+    overview = f"Высылаем отчет за {file.date_range}\n" \
                f"{marketplace}\n\n" \
                f"🛒 Заказано в шт {file.ordered_items_value} на сумму {file.ordered_sum_value} руб\n" \
                f"✅ Продажи в шт {file.sold_items_value} на сумму {file.sold_sum_value}р.\n" \
