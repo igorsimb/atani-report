@@ -1,8 +1,7 @@
-from tkinter import END, messagebox, filedialog
-
-import customtkinter
 import webbrowser
 
+from tkinter import END, messagebox, filedialog
+import customtkinter
 from collect_info import final_report, raw_data
 
 customtkinter.set_appearance_mode("dark")  # Modes: "System" (standard), "Dark", "Light"
@@ -51,7 +50,7 @@ def generate_report():
     try:
         log_textbox.configure(text_color="white")
         log_textbox.insert("0.0", raw_data(file_path_entry.get()))  # ordered_items_text
-    except KeyError:
+    except (KeyError, IndexError):
         log_textbox.configure(text_color="#D0312D")  # red
         log_textbox.insert("0.0", "ERROR! Please check the file or the format is correct.")
 

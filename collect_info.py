@@ -4,7 +4,9 @@ from openpyxl import load_workbook
 class File:
     def __init__(self, file_path):
         self.report_wb = load_workbook(file_path, read_only=True, data_only=True)
-        self.svod_shop = self.report_wb["svod_shop"]
+
+        # svod_shop
+        self.svod_shop = self.report_wb.worksheets[3]
 
         # Дата
         self.date_range = self.svod_shop["E1"].value
@@ -56,7 +58,8 @@ def overview(file):
 
 
 def conclustions(file):
-    conc = file.report_wb["ВЫВОДЫ"]
+    # ВЫВОДЫ
+    conc = file.report_wb.worksheets[0]
     conc_text = conc.iter_rows(min_row=2, min_col=1, max_col=1)  # column A, generator
     conc_text_list = []
 
@@ -69,7 +72,8 @@ def conclustions(file):
 
 
 def plan_for_next_week(file):
-    plan_sheet = file.report_wb["ПЛАН"]
+    # ПЛАН
+    plan_sheet = file.report_wb.worksheets[1]
     plan_text = plan_sheet.iter_rows(min_row=2, min_col=2, max_col=2)  # column B
     plan_status = plan_sheet.iter_rows(min_row=2, min_col=3, max_col=3)  # column C
 
