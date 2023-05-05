@@ -66,6 +66,7 @@ def file_upload():
 def generate_report():
     log_textbox.configure(state="normal")
     log_textbox.delete("1.0", END)
+    log_textbox.insert("0.0", "Generating report. Please wait...")
 
     # Show ERROR if the sheet is not found
     try:
