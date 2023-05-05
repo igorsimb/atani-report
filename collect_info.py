@@ -77,7 +77,6 @@ def conclusions(file):
     conclusions_sheet = file.report_wb.worksheets[0]
 
     conclusions_column = get_column_index_by_cell_value(sheet=conclusions_sheet, cell_value="Выводы")
-    # conclusions_column = 1
     conc_text = conclusions_sheet.iter_rows(min_row=2, min_col=conclusions_column, max_col=conclusions_column)
 
     conc_text_list = []
