@@ -46,6 +46,20 @@ class File:
         self.drr_value = f'{self.svod_shop["E35"].value * 100:.2f}'
 
 
+def get_column_index_by_cell_value(sheet, cell_value):
+    result_column = 0
+    for column in sheet.iter_rows(min_row=1, max_row=1, max_col=10):
+        for cell in column:
+            if str(cell.value).lower() == cell_value.lower():
+                print(f"Your column is #{cell.column} (i.e. column {cell.column_letter})")
+                result_column = cell.column
+                break
+        else:
+            continue
+        break
+    return result_column
+
+
 def overview(file):
     marketplace = "ОЗОН"
     overview = f"Высылаем отчет за {file.date_range}\n" \
@@ -58,10 +72,14 @@ def overview(file):
     return overview
 
 
-def conclustions(file):
+def conclusions(file):
     # ВЫВОДЫ
-    conc = file.report_wb.worksheets[0]
-    conc_text = conc.iter_rows(min_row=2, min_col=1, max_col=1)  # column A, generator
+    conclusions_sheet = file.report_wb.worksheets[0]
+
+    conclusions_column = get_column_index_by_cell_value(sheet=conclusions_sheet, cell_value="Выводы")
+    # conclusions_column = 1
+    conc_text = conclusions_sheet.iter_rows(min_row=2, min_col=conclusions_column, max_col=conclusions_column)
+
     conc_text_list = []
 
     # create a list of values from conc_text generator
@@ -114,4 +132,4 @@ def raw_data(file):
 def final_report(file):
     # instantiating class File so that generate_report function only needs the file path value
     file = File(file)
-    return f"{overview(file)}\n{conclustions(file)}\n{plan_for_next_week(file)}"
+    return f"{overview(file)}\n{conclusions(file)}\n{plan_for_next_week(file)}"

@@ -80,7 +80,7 @@ def generate_report():
     report_textbox.delete("1.0", END)
     report_textbox.insert("0.0", final_report(file_path_entry.get()))
 
-    print("Report generated", file_path_entry.get())
+    print("Report generated from", file_path_entry.get())
 
 
 def copy_report():
