@@ -3,6 +3,7 @@
 files
 output
 icon.png
+.pylintrc
 
 ### Python template
 # Byte-compiled / optimized / DLL files

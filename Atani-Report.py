@@ -1,6 +1,6 @@
 import webbrowser
 
-from tkinter import END, messagebox, filedialog
+from tkinter import END, filedialog
 import customtkinter
 from collect_info import final_report, raw_data
 
@@ -8,6 +8,9 @@ customtkinter.set_appearance_mode("dark")  # Modes: "System" (standard), "Dark",
 customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
 app = customtkinter.CTk()
+
+app_width = 500
+app_height = 830
 
 
 def align_center(width, height):
@@ -28,6 +31,24 @@ def align_center(width, height):
     x = (screen_width / 2) - (width / 2)
     y = (screen_height / 2) - (height / 2)
     return '%dx%d+%d+%d' % (width, height, x, y)
+
+
+def display_notification(label, text, disappear_after_ms=0):
+    """
+        Displays a notification message on a label widget with the given text.
+        If `disappear_after_ms` is not 0, the label text will be cleared after the specified time in milliseconds.
+
+        Args:
+
+        - label: A label widget to display the notification on.
+
+        - text: The text to display in the notification.
+
+        - disappear_after_ms: Optional. The time in milliseconds after which the notification should disappear. If not provided or set to 0, the notification will not disappear.
+    """
+    label.configure(text=text)
+    if disappear_after_ms != 0:
+        app.after(disappear_after_ms, lambda: label.configure(text=""))
 
 
 def file_upload():
@@ -65,7 +86,7 @@ def generate_report():
 def copy_report():
     app.clipboard_clear()
     app.clipboard_append(report_textbox.get("1.0", END))
-    messagebox.showinfo("Atani Report", "Your report has been copied to clipboard.")
+    display_notification(label=report_copied_label, text="Copied!", disappear_after_ms=2000)
     print("Report copied to clipboard")
 
 
@@ -73,7 +94,7 @@ def url(link):
     webbrowser.open_new(link)
 
 
-app.geometry(align_center(width=500, height=830))
+app.geometry(align_center(width=app_width, height=app_height))
 app.title("Atani Report")
 
 frame_1 = customtkinter.CTkFrame(master=app)
@@ -135,14 +156,30 @@ report_label.pack(pady=0, padx=10)
 report_textbox = customtkinter.CTkTextbox(master=frame_1, width=250, font=("Roboto", 14))
 report_textbox.pack(pady=10, padx=10, fill="both", expand=True)
 
+# "Copied!" text label
+report_copied_label = customtkinter.CTkLabel(
+    master=frame_1,
+    text="",
+    font=("Roboto", 16, "bold"),
+)
+report_copied_label.configure(text_color="#0b8556")  # green
+report_copied_label.pack(pady=0)
+
 # Copy button
-copy_button = customtkinter.CTkButton(master=frame_1, text="Copy to clipboard", command=copy_report,
-                                      width=60, font=("Roboto", 16))
+copy_button = customtkinter.CTkButton(master=frame_1,
+                                      text="Copy to clipboard",
+                                      command=copy_report,
+                                      width=60,
+                                      font=("Roboto", 18),
+                                      )
 copy_button.pack(pady=10, padx=10)
 
 # Footer
-footer = customtkinter.CTkLabel(master=frame_1, justify=customtkinter.RIGHT, text="Created by igorsimb.ru",
-                                text_color="lightblue")
+footer = customtkinter.CTkLabel(master=frame_1,
+                                justify=customtkinter.RIGHT,
+                                text="Created by igorsimb.ru",
+                                text_color="lightblue",
+                                )
 footer.pack(padx=10, side="right")
 footer.bind("<Button-1>", lambda e: url("https://igorsimb.ru/"))  # <Button-1> = left mouse button
 

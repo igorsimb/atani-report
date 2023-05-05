@@ -1,6 +1,7 @@
 from openpyxl import load_workbook
 
 
+# pylint: disable=too-many-instance-attributes
 class File:
     def __init__(self, file_path):
         self.report_wb = load_workbook(file_path, read_only=True, data_only=True)
