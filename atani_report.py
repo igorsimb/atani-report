@@ -2,7 +2,9 @@ import webbrowser
 
 from tkinter import END, filedialog
 import customtkinter
-from collect_info import final_report, raw_data
+
+import collect_info
+from collect_info import final_report, get_cell_by_value, raw_data
 
 customtkinter.set_appearance_mode("dark")  # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
@@ -10,7 +12,7 @@ customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "gre
 app = customtkinter.CTk()
 
 app_width = 500
-app_height = 830
+app_height = 890
 
 
 def align_center(width, height):
@@ -33,6 +35,43 @@ def align_center(width, height):
     return '%dx%d+%d+%d' % (width, height, x, y)
 
 
+app.geometry(align_center(width=app_width, height=app_height))
+app.minsize(width=app_width, height=app_height)
+app.title("Atani Report")
+
+frame_1 = customtkinter.CTkFrame(master=app, border_width=1)
+frame_1.pack(pady=20, padx=30, fill="both", expand=True)
+
+
+def check_correct_file_is_loaded(file):
+    try:
+        log_textbox.configure(text_color="white")
+        log_textbox.delete("1.0", END)
+        log_textbox.insert("0.0", raw_data(file_path_entry.get()))
+    except (KeyError, IndexError, TypeError):
+        report_textbox.delete("1.0", END)
+        log_textbox.configure(text_color="#D0312D")  # red
+        log_textbox.insert("0.0",
+                               f"ERROR! Could not read file.\n"
+                               f"You picked {collect_info.current_marketplace.upper()} as your marketplace. Please "
+                               f"check the file or the format is correct.\n\n")
+    else:
+        ozon = collect_info.current_marketplace == "ozon"
+        wb = collect_info.current_marketplace == "wb"
+        ordered_items_cell = get_cell_by_value(file=file, cell_value="Заказано товаров, шт.")
+
+        # Ozon has "Заказано товаров, шт." in A5, WB in A3
+        if not (
+            ozon and "A5" in ordered_items_cell
+            or
+            wb and "A3" in ordered_items_cell
+        ):
+            log_textbox.configure(text_color="#d1c413")  # yellow
+            log_textbox.insert("0.0", f"WARNING! You picked {collect_info.current_marketplace.upper()} as your "
+                                  f"marketplace.\nYou may have loaded an incorrect file. Please make sure your "
+                                      f"chosen marketplace matches the uploaded file.\n\n")
+
+
 def display_notification(label, text, disappear_after_ms=0):
     """
         Displays a notification message on a label widget with the given text.
@@ -53,14 +92,13 @@ def display_notification(label, text, disappear_after_ms=0):
 
 def file_upload():
     print("Upload Button clicked")
-    file = filedialog.askopenfilename(title="Select a File",  # initialdir=os.getcwd(),
+    file = filedialog.askopenfilename(title="Select a File",
                                       filetypes=(("Excel files", "*.xlsx*"),
                                                  ("all files", "*.*")))
 
     # Change entry contents
     file_path_entry.delete(0, END)
     file_path_entry.insert(0, file)
-    generate_report_button.configure(state="normal")
 
 
 def generate_report():
@@ -68,16 +106,9 @@ def generate_report():
     log_textbox.delete("1.0", END)
     log_textbox.insert("0.0", "Generating report. Please wait...")
 
-    # Show ERROR if the sheet is not found
-    try:
-        log_textbox.configure(text_color="white")
-        log_textbox.insert("0.0", raw_data(file_path_entry.get()))  # ordered_items_text
-    except (KeyError, IndexError):
-        log_textbox.configure(text_color="#D0312D")  # red
-        log_textbox.insert("0.0", "ERROR! Please check the file or the format is correct.")
+    check_correct_file_is_loaded(file_path_entry.get())
 
     log_textbox.configure(state="disabled")
-
     report_textbox.delete("1.0", END)
     report_textbox.insert("0.0", final_report(file_path_entry.get()))
 
@@ -95,11 +126,30 @@ def url(link):
     webbrowser.open_new(link)
 
 
-app.geometry(align_center(width=app_width, height=app_height))
-app.title("Atani Report")
+def choose_marketplace(marketplace):
+    """
+        Changes the color of the button for the selected marketplace.
 
-frame_1 = customtkinter.CTkFrame(master=app)
-frame_1.pack(pady=20, padx=30, fill="both", expand=True)
+        Args:
+        marketplace (str): The name of the marketplace to select. Valid values are "ozon" and "wb".
+
+    Returns:
+        str: The name of the chosen current marketplace.
+
+        """
+
+    if marketplace == "ozon":
+        ozon_button.configure(bg_color="#025BFB")
+        wb_button.configure(bg_color="transparent")
+        collect_info.current_marketplace = "ozon"
+    elif marketplace == "wb":
+        wb_button.configure(bg_color="#5B117B")
+        ozon_button.configure(bg_color="transparent")
+        collect_info.current_marketplace = "wb"
+
+    generate_report_button.configure(state="normal")
+    return collect_info.current_marketplace
+
 
 header = customtkinter.CTkLabel(master=frame_1,
                                 justify=customtkinter.LEFT,
@@ -116,6 +166,39 @@ upload_button = customtkinter.CTkButton(master=frame_1,
                                         width=60,
                                         font=("Roboto", 16))
 upload_button.place(relx=1, x=-70, y=68)
+
+marketplaces = customtkinter.CTkFrame(master=frame_1, fg_color="transparent")
+marketplaces.pack(side="top", anchor="w", padx=20, pady=10)
+marketplaces.configure()
+ozon_button = customtkinter.CTkButton(master=marketplaces,
+                                      text="Ozon",
+                                      font=("Roboto", 24),
+                                      fg_color="transparent",
+                                      border_width=1,
+                                      border_spacing=0,
+                                      text_color=("gray10", "#DCE4EE"),
+                                      hover_color="#025BFB",
+                                      width=80,
+                                      height=60,
+                                      )
+
+ozon_button.pack(side="left")
+ozon_button.bind("<Button-1>", lambda e: choose_marketplace("ozon"))
+
+wb_button = customtkinter.CTkButton(master=marketplaces,
+                                    text="WB",
+                                    font=("Roboto", 24),
+                                    fg_color="transparent",
+                                    border_width=1,
+                                    border_spacing=0,
+                                    text_color=("gray10", "#DCE4EE"),
+                                    hover_color="#5B117B",
+                                    width=80,
+                                    height=60,
+                                    )
+wb_button.place(relx=0, x=60, y=1)
+wb_button.pack(side="left", padx=20)
+wb_button.bind("<Button-1>", lambda e: choose_marketplace("wb"))
 
 # Generate report button
 generate_report_button = customtkinter.CTkButton(master=frame_1,
@@ -181,7 +264,7 @@ footer = customtkinter.CTkLabel(master=frame_1,
                                 text="Created by igorsimb.ru",
                                 text_color="lightblue",
                                 )
-footer.pack(padx=10, side="right")
+footer.pack(padx=10, pady=2, side="right")
 footer.bind("<Button-1>", lambda e: url("https://igorsimb.ru/"))  # <Button-1> = left mouse button
 
 app.mainloop()

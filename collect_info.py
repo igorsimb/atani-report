@@ -1,49 +1,6 @@
-from openpyxl import load_workbook
+from data_locators import OzonFile, WbFile
 
-
-# pylint: disable=too-many-instance-attributes
-class File:
-    def __init__(self, file_path):
-        self.report_wb = load_workbook(file_path, read_only=True, data_only=True)
-
-        # svod_shop
-        self.svod_shop = self.report_wb.worksheets[3]
-
-        # Дата
-        self.date_range = self.svod_shop["E1"].value
-
-        # Заказано товаров, шт.
-        self.ordered_items_text = self.svod_shop["A5"].value
-        self.ordered_items_value = self.svod_shop["E5"].value
-        self.ordered_items_value = f"{self.ordered_items_value:,}".replace(",", " ")
-
-        # Заказано на сумму, руб.
-        self.ordered_sum_text = self.svod_shop["A4"].value
-        self.ordered_sum_value = self.svod_shop["E4"].value
-        self.ordered_sum_value = f"{self.ordered_sum_value:,}".replace(",", " ")
-
-        # Продажи, шт.
-        self.sold_items_text = self.svod_shop["A10"].value
-        self.sold_items_value = self.svod_shop["E10"].value
-        self.sold_items_value = f"{self.sold_items_value:,}".replace(",", " ")
-
-        # Продажи, руб.
-        self.sold_sum_text = self.svod_shop["A9"].value
-        self.sold_sum_value = self.svod_shop["E9"].value
-        self.sold_sum_value = f"{self.sold_sum_value:,}".replace(",", " ")
-
-        # Средняя цена продажи, руб.
-        self.ave_sum_text = self.svod_shop["A11"].value
-        self.ave_sum_value = self.svod_shop["E11"].value
-        self.ave_sum_value = f"{self.ave_sum_value:,.2f}".replace(",", " ")
-
-        # CTR, %
-        self.ctr_text = self.svod_shop["A29"].value
-        self.ctr_value = f'{self.svod_shop["E29"].value * 100:.2f}'
-
-        # ДРР, %
-        self.drr_text = self.svod_shop["A35"].value
-        self.drr_value = f'{self.svod_shop["E35"].value * 100:.2f}'
+current_marketplace = ""
 
 
 def get_column_index_by_cell_value(sheet, cell_value):
@@ -51,7 +8,6 @@ def get_column_index_by_cell_value(sheet, cell_value):
     for column in sheet.iter_rows(min_row=1, max_row=1, max_col=10):
         for cell in column:
             if str(cell.value).lower() == cell_value.lower():
-                print(f"Your column is #{cell.column} (i.e. column {cell.column_letter})")
                 result_column = cell.column
                 break
         else:
@@ -61,9 +17,8 @@ def get_column_index_by_cell_value(sheet, cell_value):
 
 
 def overview(file):
-    marketplace = "ОЗОН"
     overview = f"Высылаем отчет за {file.date_range}\n" \
-               f"{marketplace}\n\n" \
+               f"{current_marketplace.upper()}\n\n" \
                f"🛒 Заказано в шт {file.ordered_items_value} на сумму {file.ordered_sum_value} руб\n" \
                f"✅ Продажи в шт {file.sold_items_value} на сумму {file.sold_sum_value}р.\n" \
                f"Средняя цена продажи {file.ave_sum_value} р\n" \
@@ -114,21 +69,45 @@ def plan_for_next_week(file):
 
 
 def raw_data(file):
-    file = File(file)
+    if current_marketplace == "ozon":
+        file = OzonFile(file)
+    elif current_marketplace == "wb":
+        file = WbFile(file)
+
     log_list = [
         f"Sheet name: {file.svod_shop.title}\n",
-        f"[A5]: {file.ordered_items_text}\n[E5]: {file.ordered_items_value}\n",
-        f"[A4]: {file.ordered_sum_text}\n[E4]: {file.ordered_sum_value}\n",
-        f"[A10]: {file.sold_items_text}\n[E10]: {file.sold_items_value}\n",
-        f"[A9]: {file.sold_sum_text}\n[E9]: {file.sold_sum_value}\n",
-        f"[A11]: {file.ave_sum_text}\n[E11]: {file.ave_sum_value}\n",
-        f"[A29]: {file.ctr_text}\n[E29]: {file.ctr_value}\n",
-        f"[A35]: {file.drr_text}\n[E35]: {file.drr_value}",
+        f"{file.ordered_items_text}:  {file.ordered_items_value}",
+        f"{file.ordered_sum_text}:  {file.ordered_sum_value}",
+        f"{file.sold_items_text}:  {file.sold_items_value}",
+        f"{file.sold_sum_text}:  {file.sold_sum_value}",
+        f"{file.ave_sum_text}:  {file.ave_sum_value}",
+        f"{file.ctr_text}:  {file.ctr_value}",
+        f"{file.drr_text}:  {file.drr_value}",
     ]
     return "\n".join(log_list)
 
 
+def get_cell_by_value(file, cell_value):
+    if current_marketplace == "ozon":
+        file = OzonFile(file)
+    elif current_marketplace == "wb":
+        file = WbFile(file)
+    result_cell = ""
+    for column in file.svod_shop.iter_rows(min_row=1, max_row=50, max_col=30):
+        for cell in column:
+            if str(cell.value).lower() == cell_value.lower():
+                result_cell = cell.coordinate
+                break
+        else:
+            continue
+        break
+    return result_cell
+
+
 def final_report(file):
     # instantiating class File so that generate_report function only needs the file path value
-    file = File(file)
+    if current_marketplace == "ozon":
+        file = OzonFile(file)
+    elif current_marketplace == "wb":
+        file = WbFile(file)
     return f"{overview(file)}\n{conclusions(file)}\n{plan_for_next_week(file)}"
