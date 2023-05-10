@@ -19,9 +19,9 @@ def get_column_index_by_cell_value(sheet, cell_value):
 def overview(file):
     overview = f"Высылаем отчет за {file.date_range}\n" \
                f"{current_marketplace.upper()}\n\n" \
-               f"🛒 Заказано в шт {file.ordered_items_value} на сумму {file.ordered_sum_value} руб\n" \
-               f"✅ Продажи в шт {file.sold_items_value} на сумму {file.sold_sum_value}р.\n" \
-               f"Средняя цена продажи {file.ave_sum_value} р\n" \
+               f"🛒 Заказано в шт {file.ordered_items_value} на сумму {file.ordered_sum_value} руб.\n" \
+               f"✅ Продажи в шт {file.sold_items_value} на сумму {file.sold_sum_value} руб.\n" \
+               f"Средняя цена продажи {file.ave_sum_value} руб.\n" \
                f"CTR {file.ctr_value}%\n" \
                f"ДРР {file.drr_value}%\n"
     return overview

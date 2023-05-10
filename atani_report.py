@@ -36,10 +36,9 @@ def align_center(width, height):
 
 
 app.geometry(align_center(width=app_width, height=app_height))
-app.minsize(width=app_width, height=app_height)
 app.title("Atani Report")
 
-frame_1 = customtkinter.CTkFrame(master=app, border_width=1)
+frame_1 = customtkinter.CTkScrollableFrame(master=app, border_width=1)
 frame_1.pack(pady=20, padx=30, fill="both", expand=True)
 
 
