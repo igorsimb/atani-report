@@ -1,9 +1,10 @@
+from __future__ import annotations
 from data_locators import OzonFile, WbFile
 
 current_marketplace = ""
 
 
-def get_column_index_by_cell_value(sheet, cell_value):
+def get_column_index_by_cell_value(sheet, cell_value: str) -> int:
     result_column = 0
     for column in sheet.iter_rows(min_row=1, max_row=1, max_col=10):
         for cell in column:
@@ -16,7 +17,7 @@ def get_column_index_by_cell_value(sheet, cell_value):
     return result_column
 
 
-def overview(file):
+def overview(file: OzonFile | WbFile) -> str:
     overview = f"Высылаем отчет за {file.date_range}\n" \
                f"{current_marketplace.upper()}\n\n" \
                f"🛒 Заказано в шт {file.ordered_items_value} на сумму {file.ordered_sum_value} руб.\n" \
@@ -27,7 +28,7 @@ def overview(file):
     return overview
 
 
-def conclusions(file):
+def conclusions(file: OzonFile | WbFile) -> str:
     # ВЫВОДЫ
     conclusions_sheet = file.report_wb.worksheets[0]
 
@@ -44,7 +45,7 @@ def conclusions(file):
     return "\n".join(conc_text_list)
 
 
-def plan_for_next_week(file):
+def plan_for_next_week(file: OzonFile | WbFile) -> str:
     # ПЛАН
     plan_sheet = file.report_wb.worksheets[1]
     plan_text = plan_sheet.iter_rows(min_row=2, min_col=2, max_col=2)  # column B
@@ -68,7 +69,7 @@ def plan_for_next_week(file):
     return "\n".join(plan_list)
 
 
-def raw_data(file):
+def raw_data(file: OzonFile | WbFile) -> str:
     if current_marketplace == "ozon":
         file = OzonFile(file)
     elif current_marketplace == "wb":
@@ -87,7 +88,7 @@ def raw_data(file):
     return "\n".join(log_list)
 
 
-def get_cell_by_value(file, cell_value):
+def get_cell_by_value(file: OzonFile | WbFile, cell_value: str) -> str:
     if current_marketplace == "ozon":
         file = OzonFile(file)
     elif current_marketplace == "wb":
@@ -104,7 +105,7 @@ def get_cell_by_value(file, cell_value):
     return result_cell
 
 
-def final_report(file):
+def final_report(file: OzonFile | WbFile) -> str:
     # instantiating class File so that generate_report function only needs the file path value
     if current_marketplace == "ozon":
         file = OzonFile(file)
