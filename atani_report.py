@@ -19,33 +19,47 @@ def align_center(width, height):
 
 
 def check_correct_file_is_loaded(file):
+
+    """
+    Checks if the correct file has been loaded for the selected marketplace. It takes a file as input and tries to
+    read data from it. If an error occurs, it displays an error message.
+    Otherwise, it checks if the file contains the expected data for the selected marketplace and displays a warning
+    message if it doesn't.
+    """
+
     try:
         log_textbox.configure(text_color="white")
         log_textbox.delete("1.0", END)
         log_textbox.insert("0.0", raw_data(file_path_entry.get()))
-    except (KeyError, IndexError, TypeError):
+    except (KeyError, IndexError, TypeError, ValueError):
         report_textbox.delete("1.0", END)
         log_textbox.configure(text_color="#D0312D")  # red
         log_textbox.insert(
             "0.0",
-            f"ERROR! Could not read file.\nYou picked {collect_info.current_marketplace.upper()} as your marketplace. Please check the file or the format is correct.\n\n",
+            f"WrongFile ERROR! Could not read file.\nYou picked {collect_info.current_marketplace.upper()} as your "
+            f"marketplace. Please check the file or the format is correct.\n\n",
         )
     else:
         ordered_items_cell = get_cell_by_value(
-            file=file, cell_value="Заказано товаров, шт."
+            file_path=file, cell_value="Заказано товаров, шт."
         )
-        ozon, wb = (
+        is_ozon_chosen, is_wb_chosen, is_yandex_chosen = (
             collect_info.current_marketplace == "ozon",
             collect_info.current_marketplace == "wb",
+            collect_info.current_marketplace == "yandex",
         )
-        # Ozon has "Заказано товаров, шт." in A5, WB in A3
+        # Ozon has "Заказано товаров, шт." in A5, WB in A3, yandex in A4
         if not (
-                ozon and "A5" in ordered_items_cell or wb and "A3" in ordered_items_cell
+                is_ozon_chosen and "A5" in ordered_items_cell
+                or is_wb_chosen and "A3" in ordered_items_cell
+                or is_yandex_chosen and "A4" in ordered_items_cell
         ):
             log_textbox.configure(text_color="#d1c413")  # yellow
             log_textbox.insert(
                 "0.0",
-                f"WARNING! You picked {collect_info.current_marketplace.upper()} as your marketplace.\nYou may have loaded an incorrect file. Please make sure your chosen marketplace matches the uploaded file.\n\n",
+                f"WrongFile WARNING! You picked {collect_info.current_marketplace.upper()} as your marketplace.\n"
+                f"However, the file you uploaded does not contain the expected data for this marketplace.\n "
+                f"Please make sure your chosen marketplace matches the uploaded file.\n\n",
             )
 
 
@@ -95,14 +109,27 @@ def url(link):
 
 
 def choose_marketplace(marketplace):
+    """
+    Sets the current marketplace to the one passed in the parameter.
+    Sets the button colors accordingly.
+    Sets the current marketplace in the collect_info module.
+    Enables the generate_report_button.
+    """
     if marketplace == "ozon":
-        ozon_button.configure(bg_color="#025BFB")
-        wb_button.configure(bg_color="transparent")
+        ozon_button.configure(fg_color="#025BFB")
+        wb_button.configure(fg_color="transparent")
+        yandex_button.configure(fg_color="transparent")
         collect_info.current_marketplace = "ozon"
     elif marketplace == "wb":
-        wb_button.configure(bg_color="#5B117B")
-        ozon_button.configure(bg_color="transparent")
+        wb_button.configure(fg_color="#5B117B")
+        ozon_button.configure(fg_color="transparent")
+        yandex_button.configure(fg_color="transparent")
         collect_info.current_marketplace = "wb"
+    elif marketplace == "yandex":
+        yandex_button.configure(fg_color="#FC3F1D")
+        wb_button.configure(fg_color="transparent")
+        ozon_button.configure(fg_color="transparent")
+        collect_info.current_marketplace = "yandex"
 
     generate_report_button.configure(state="normal")
     return collect_info.current_marketplace
@@ -115,7 +142,6 @@ app.title("Atani Report")
 app_width = 500
 app_height = 890
 app.geometry(align_center(width=app_width, height=app_height))
-
 
 frame = ctk.CTkScrollableFrame(app, border_width=1)
 frame.pack(pady=20, padx=30, fill="both", expand=True)
@@ -148,6 +174,14 @@ wb_button = ctk.CTkButton(marketplaces_frame, text="WB", font=("Roboto", 24),
 wb_button.pack(side="left", padx=20)
 wb_button.bind("<Button-1>", lambda e: choose_marketplace("wb"))
 
+yandex_button = ctk.CTkButton(marketplaces_frame,
+                              text="ЯМ", font=("Roboto", 24),
+                              fg_color="transparent", border_width=1,
+                              border_spacing=0, text_color=("gray10", "#DCE4EE"),
+                              hover_color="#FC3F1D", width=80, height=60)
+yandex_button.pack(side="left", padx=0)
+yandex_button.bind("<Button-1>", lambda e: choose_marketplace("yandex"))
+
 # Report generation button
 generate_report_button = ctk.CTkButton(frame, text="Generate Report", command=generate_report,
                                        width=60, font=("Roboto", 16),
@@ -165,10 +199,9 @@ log_label = ctk.CTkLabel(frame, text="Raw Data", font=("Roboto", 18))
 log_label.pack(pady=0, padx=10)
 
 log_textbox = ctk.CTkTextbox(frame, width=250, height=100, fg_color="transparent",
-                              border_width=1, font=("Roboto", 14))
+                             border_width=1, font=("Roboto", 14))
 log_textbox.configure(state="disabled")
 log_textbox.pack(pady=10, padx=10, fill="both", expand=True)
-
 
 # Empty label to reduce visual clutter
 empty_label_2 = ctk.CTkLabel(master=frame, text="")
