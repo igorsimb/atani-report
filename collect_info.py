@@ -41,9 +41,9 @@ def overview(file: OzonFile | WbFile | YandexFile) -> str:
         f"ДРР {file.drr_value}%",
     ]
 
-    # yandex does not have ave_sum_text/value and ctr_text/value
+    # yandex does not have ctr_text/value
     if isinstance(file, YandexFile):
-        del overview_list[4:6]
+        del overview_list[5]
 
     return "\n".join(overview_list)
 
@@ -114,9 +114,9 @@ def raw_data(file_path: str) -> str:
         f"{file.drr_text}:  {file.drr_value}",
     ]
 
-    # yandex does not have ave_sum_text/value and ctr_text/value
+    # yandex does not have ctr_text/value
     if isinstance(file, YandexFile):
-        del log_list[5:7]
+        del log_list[6]
 
     return "\n".join(log_list)
 

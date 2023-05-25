@@ -124,9 +124,9 @@ class YandexFile:
         self.sold_items_value = f"{self.sold_items_value:,}".replace(",", " ")
 
         # Средняя цена продажи, руб.
-
-        self.ave_sum_text = None
-        self.ave_sum_value = None
+        self.ave_sum_text = "Средняя цена продажи, руб."
+        self.ave_sum_value = int(float(self.sold_sum_value.replace(' ', ''))/float(self.sold_items_value))
+        self.ave_sum_value = f"{self.ave_sum_value}".replace(",", " ")
 
         # CTR, %
         self.ctr_text = None
